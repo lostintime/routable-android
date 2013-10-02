@@ -10,3 +10,5 @@ _layouts
 .DS_Store
 gh-pages
 res/
+.idea/
+*.iml
