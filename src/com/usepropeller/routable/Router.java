@@ -38,6 +38,7 @@ import android.os.Bundle;
 
 public class Router {
 	private static final Router _router = new Router();
+    private static final String INTENT_PARAM_QUERY_STRING = "query_string";
 
 	/**
      * A globally accessible Router instance that will work for
@@ -52,7 +53,7 @@ public class Router {
      * to a Router URL.
      */
 	public static abstract class RouterCallback {
-		public abstract void run(Map<String, String> params, Bundle extras);
+		public abstract void run(Map<String, String> params, String queryString, Bundle extras);
 	}
 
 	/**
@@ -110,6 +111,7 @@ public class Router {
 	private static class RouterParams {
 		public RouterOptions routerOptions;
 		public Map<String, String> openParams;
+        public String queryString;
 	}
 
 	private final Map<String, RouterOptions> _routes = new HashMap<String, RouterOptions>();
@@ -301,7 +303,7 @@ public class Router {
 		RouterParams params = this.paramsForUrl(url);
 		RouterOptions options = params.routerOptions;
 		if (options.getCallback() != null) {
-			options.getCallback().run(params.openParams, extras);
+			options.getCallback().run(params.openParams, params.queryString, extras);
 			return;
 		}
 
@@ -342,6 +344,9 @@ public class Router {
 		for (Entry<String, String> entry : params.openParams.entrySet()) {
 			intent.putExtra(entry.getKey(), entry.getValue());
 		}
+        if (null != params.queryString) {
+            intent.putExtra(INTENT_PARAM_QUERY_STRING, params.queryString);
+        }
 		return intent;
 	}
 
@@ -383,6 +388,14 @@ public class Router {
 			return this._cachedRoutes.get(url);
 		}
 
+        int qsPos = url.indexOf('?');
+        String queryString = null;
+
+        if (qsPos != -1) {
+            queryString = url.substring(qsPos + 1);
+            url = url.substring(0, qsPos);
+        }
+
 		String[] givenParts = url.split("/");
 
 		RouterOptions openOptions = null;
@@ -405,6 +418,7 @@ public class Router {
 			openParams = new RouterParams();
 			openParams.openParams = givenParams;
 			openParams.routerOptions = routerOptions;
+            openParams.queryString = queryString;
 			break;
 		}
 
