@@ -38,7 +38,7 @@ import android.os.Bundle;
 
 public class Router {
 	private static final Router _router = new Router();
-    private static final String INTENT_PARAM_QUERY_STRING = "query_string";
+    public static final String INTENT_PARAM_QUERY_STRING = "query_string";
 
 	/**
      * A globally accessible Router instance that will work for
