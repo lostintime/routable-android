@@ -37,10 +37,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import static com.google.common.base.Preconditions.*;
@@ -520,21 +518,17 @@ public class Router {
             int paramIndex = 0;
             for (String part : givenParts) {
                 if (":".equals(part.substring(0, 1))) {
-                    Log.d("Router", String.format("fount param %d", paramIndex));
                     String pName = part.substring(1);
                     String pIdx = String.valueOf(paramIndex);
                     if (params.containsKey(pName)) {
-                        Log.d("Router", String.format("params contains \"%s\"", pName));
                         renderParts.add(String.valueOf(params.get(pName)));
                     } else if (params.containsKey(pIdx)) {
-                        Log.d("Router", String.format("params contains \"%s\"", pIdx));
                         renderParts.add(String.valueOf(params.get(pIdx)));
                     } else {
                         throw new RuntimeException(String.format("No value found for \"%s\"", part));
                     }
                     paramIndex++;
                 } else {
-                    Log.d("Router", String.format("\"%s\" not a param", part));
                     renderParts.add(part);
                 }
             }
