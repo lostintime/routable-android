@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -489,6 +490,11 @@ public class Router {
             mParams = paramsMap(params);
         }
 
+        public Route(String route, HashMap<String, Object> params) {
+            mRoute = checkNotNull(route);
+            mParams = checkNotNull(params);
+        }
+
         public static String renderRoute(Route route) {
             return renderRoute(route.mRoute, route.mParams);
         }
@@ -511,20 +517,26 @@ public class Router {
             Iterable<String> givenParts = Splitter.on("/").split(url);
             List<String> renderParts = new ArrayList<String>();
 
-            int i = 0;
+            int paramIndex = 0;
             for (String part : givenParts) {
-                if (part.substring(0, 1).equals(':')) {
-                    if (params.containsKey(part)) {
-                        renderParts.add(part);
-                    } else if (params.containsKey(String.valueOf(i))) {
-                        renderParts.add((String) params.get(String.valueOf(i)));
+                if (":".equals(part.substring(0, 1))) {
+                    Log.d("Router", String.format("fount param %d", paramIndex));
+                    String pName = part.substring(1);
+                    String pIdx = String.valueOf(paramIndex);
+                    if (params.containsKey(pName)) {
+                        Log.d("Router", String.format("params contains \"%s\"", pName));
+                        renderParts.add(String.valueOf(params.get(pName)));
+                    } else if (params.containsKey(pIdx)) {
+                        Log.d("Router", String.format("params contains \"%s\"", pIdx));
+                        renderParts.add(String.valueOf(params.get(pIdx)));
                     } else {
                         throw new RuntimeException(String.format("No value found for \"%s\"", part));
                     }
+                    paramIndex++;
                 } else {
+                    Log.d("Router", String.format("\"%s\" not a param", part));
                     renderParts.add(part);
                 }
-                i++;
             }
 
             return Joiner.on('/').join(renderParts).concat(queryString.isPresent() ? "?" + queryString.get() : "");
