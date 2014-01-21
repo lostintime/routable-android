@@ -45,7 +45,8 @@ import static com.google.common.base.Preconditions.*;
 
 public class Router {
     private static final Router _router = new Router();
-    public static final String INTENT_PARAM_QUERY_STRING = "query_string";
+    public static final String INTENT_PARAM_URL = "routable_url";
+    public static final String INTENT_PARAM_QUERY_STRING = "routable_query_string";
 
     /**
      * A globally accessible Router instance that will work for
@@ -387,6 +388,7 @@ public class Router {
         for (Entry<String, String> entry : params.openParams.entrySet()) {
             intent.putExtra(entry.getKey(), entry.getValue());
         }
+        intent.putExtra(INTENT_PARAM_URL, url);
         if (null != params.queryString) {
             intent.putExtra(INTENT_PARAM_QUERY_STRING, params.queryString);
         }
