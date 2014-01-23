@@ -365,23 +365,29 @@ public class Router {
 
     /**
      * Open a map'd URL for result
-     * @param url The URL; for example, "users/16" or "groups/5/topics/20"
-     * @param extras  The {@link Bundle} which contains the extras to be assigned to the generated {@link Intent}
-     * @param context The context which is used in the generated {@link Intent}
+     *
+     * @param url         The URL; for example, "users/16" or "groups/5/topics/20"
+     * @param extras      The {@link Bundle} which contains the extras to be assigned to the generated {@link Intent}
+     * @param context     The context which is used in the generated {@link Intent}
      * @param requestCode The request code, to handle within onActivityResult
      */
     public void openForResult(String url, Bundle extras, Context context, int requestCode) {
         openForResult(url, extras, context, requestCode, 0);
     }
 
+    public void openForResult(String url, Bundle extras, Context context, int requestCode, int intentFlags) {
+        openForResult(url, extras, context, requestCode, intentFlags, null);
+    }
+
     /**
      * Open a map'd URL for result
-     * @param url The URL; for example, "users/16" or "groups/5/topics/20"
-     * @param extras  The {@link Bundle} which contains the extras to be assigned to the generated {@link Intent}
-     * @param context The context which is used in the generated {@link Intent}
+     *
+     * @param url         The URL; for example, "users/16" or "groups/5/topics/20"
+     * @param extras      The {@link Bundle} which contains the extras to be assigned to the generated {@link Intent}
+     * @param context     The context which is used in the generated {@link Intent}
      * @param requestCode The request code, to handle within onActivityResult
      */
-    public void openForResult(String url, Bundle extras, Context context, int requestCode, int intentFlags) {
+    public void openForResult(String url, Bundle extras, Context context, int requestCode, int intentFlags, Intent o) {
         if (context == null || !(context instanceof Activity)) {
             throw new ContextNotProvided(
                     "You need to supply a context for Router and it should be instance of activity "
@@ -391,7 +397,7 @@ public class Router {
         RouterOptions options = params.routerOptions;
         checkState(options.getCallback() == null, "openForResult cannot be used for callback routes");
 
-        Intent intent = this.intentFor(context, url);
+        Intent intent = this.intentFor(context, url, o);
         if (intent == null) {
             // Means the options weren't opening a new activity
             return;
@@ -401,6 +407,16 @@ public class Router {
         }
         intent.addFlags(intentFlags);
         ((Activity) context).startActivityForResult(intent, requestCode);
+    }
+
+    /**
+     * @param url The URL to check
+     * @return Whether or not the URL refers to an anonymous callback function
+     */
+    public boolean isCallbackUrl(String url) {
+        RouterParams params = this.paramsForUrl(url);
+        RouterOptions options = params.routerOptions;
+        return options.getCallback() != null;
     }
 
     /*
@@ -417,9 +433,17 @@ public class Router {
      * @return The {@link Intent} for the url
      */
     public Intent intentFor(String url) {
+        return intentFor(url, null);
+    }
+
+    /**
+     * @param url The URL; for example, "users/16" or "groups/5/topics/20"
+     * @return The {@link Intent} for the url
+     */
+    public Intent intentFor(String url, Intent o) {
         RouterParams params = this.paramsForUrl(url);
         RouterOptions options = params.routerOptions;
-        Intent intent = new Intent();
+        Intent intent = o == null ? new Intent() : new Intent(o);
         if (options.getDefaultParams() != null) {
             for (Entry<String, String> entry : options.getDefaultParams().entrySet()) {
                 intent.putExtra(entry.getKey(), entry.getValue());
@@ -436,13 +460,12 @@ public class Router {
     }
 
     /**
-     * @param url The URL to check
-     * @return Whether or not the URL refers to an anonymous callback function
+     * @param context The context which is spawning the intent
+     * @param url     The URL; for example, "users/16" or "groups/5/topics/20"
+     * @return The {@link Intent} for the url, with the correct {@link Activity} set, or null.
      */
-    public boolean isCallbackUrl(String url) {
-        RouterParams params = this.paramsForUrl(url);
-        RouterOptions options = params.routerOptions;
-        return options.getCallback() != null;
+    public Intent intentFor(Context context, String url) {
+        return intentFor(context, url, null);
     }
 
     /**
@@ -450,14 +473,14 @@ public class Router {
      * @param url     The URL; for example, "users/16" or "groups/5/topics/20"
      * @return The {@link Intent} for the url, with the correct {@link Activity} set, or null.
      */
-    public Intent intentFor(Context context, String url) {
+    public Intent intentFor(Context context, String url, Intent o) {
         RouterParams params = this.paramsForUrl(url);
         RouterOptions options = params.routerOptions;
         if (options.getCallback() != null) {
             return null;
         }
 
-        Intent intent = intentFor(url);
+        Intent intent = intentFor(url, o);
         intent.setClass(context, options.getOpenClass());
         this.addFlagsToIntent(intent, context);
         return intent;
