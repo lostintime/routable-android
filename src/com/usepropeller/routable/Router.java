@@ -363,7 +363,25 @@ public class Router {
         context.startActivity(intent);
     }
 
-    public void openForResult(String url, Bundle extras, Context context, int intentFlags, int requestCode) {
+    /**
+     * Open a map'd URL for result
+     * @param url The URL; for example, "users/16" or "groups/5/topics/20"
+     * @param extras  The {@link Bundle} which contains the extras to be assigned to the generated {@link Intent}
+     * @param context The context which is used in the generated {@link Intent}
+     * @param requestCode The request code, to handle within onActivityResult
+     */
+    public void openForResult(String url, Bundle extras, Context context, int requestCode) {
+        openForResult(url, extras, context, requestCode, 0);
+    }
+
+    /**
+     * Open a map'd URL for result
+     * @param url The URL; for example, "users/16" or "groups/5/topics/20"
+     * @param extras  The {@link Bundle} which contains the extras to be assigned to the generated {@link Intent}
+     * @param context The context which is used in the generated {@link Intent}
+     * @param requestCode The request code, to handle within onActivityResult
+     */
+    public void openForResult(String url, Bundle extras, Context context, int requestCode, int intentFlags) {
         if (context == null || !(context instanceof Activity)) {
             throw new ContextNotProvided(
                     "You need to supply a context for Router and it should be instance of activity "
