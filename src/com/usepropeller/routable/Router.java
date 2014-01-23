@@ -363,6 +363,28 @@ public class Router {
         context.startActivity(intent);
     }
 
+    public void openForResult(String url, Bundle extras, Context context, int intentFlags, int requestCode) {
+        if (context == null || !(context instanceof Activity)) {
+            throw new ContextNotProvided(
+                    "You need to supply a context for Router and it should be instance of activity "
+                            + this.toString());
+        }
+        RouterParams params = this.paramsForUrl(url);
+        RouterOptions options = params.routerOptions;
+        checkState(options.getCallback() == null, "openForResult cannot be used for callback routes");
+
+        Intent intent = this.intentFor(context, url);
+        if (intent == null) {
+            // Means the options weren't opening a new activity
+            return;
+        }
+        if (extras != null) {
+            intent.putExtras(extras);
+        }
+        intent.addFlags(intentFlags);
+        ((Activity) context).startActivityForResult(intent, requestCode);
+    }
+
     /*
      * Allows Intents to be spawned regardless of what context they were opened with.
      */
