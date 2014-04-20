@@ -26,12 +26,6 @@
 
 package com.usepropeller.routable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +35,14 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 
-import static com.google.common.base.Preconditions.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public class Router {
     private static final Router _router = new Router();
@@ -119,6 +120,7 @@ public class Router {
     private static class RouterParams {
         public RouterOptions routerOptions;
         public Map<String, String> openParams;
+        public String matchingRoute;
         public String queryString;
     }
 
@@ -486,16 +488,25 @@ public class Router {
         return intent;
     }
 
+    public Boolean urlMatchRoute(String url, String route) {
+        try {
+            return checkNotNull(route).equals(paramsForUrl(url).matchingRoute);
+        } catch (RouteNotFoundException e) {
+            e.printStackTrace();
+            return Boolean.FALSE;
+        }
+    }
+
     /*
      * Takes a url (i.e. "/users/16/hello") and breaks it into a {@link RouterParams} instance where
      * each of the parameters (like ":id") has been parsed.
      */
-    private RouterParams paramsForUrl(String url) {
-        if (this._cachedRoutes.get(url) != null) {
+    public RouterParams paramsForUrl(String url) {
+        if (this._cachedRoutes.get(checkNotNull(url)) != null) {
             return this._cachedRoutes.get(url);
         }
 
-        int qsPos = url.indexOf('?');
+        final int qsPos = url.indexOf('?');
         String queryString = null;
 
         if (qsPos != -1) {
@@ -526,6 +537,7 @@ public class Router {
             openParams.openParams = givenParams;
             openParams.routerOptions = routerOptions;
             openParams.queryString = queryString;
+            openParams.matchingRoute = routerUrl;
             break;
         }
 
