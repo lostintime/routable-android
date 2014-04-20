@@ -117,7 +117,7 @@ public class Router {
         }
     }
 
-    private static class RouterParams {
+    public class RouterParams {
         public RouterOptions routerOptions;
         public Map<String, String> openParams;
         public String matchingRoute;
