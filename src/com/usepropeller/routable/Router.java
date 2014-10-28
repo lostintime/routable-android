@@ -412,6 +412,14 @@ public class Router {
         ((Activity) context).startActivityForResult(intent, requestCode);
     }
 
+    public void openForResult(String url, Bundle extras, Fragment fragment, int requestCode) {
+        openForResult(url, extras, fragment, requestCode, 0);
+    }
+
+    public void openForResult(String url, Bundle extras, Fragment fragment, int requestCode, int intentFlags) {
+        openForResult(url, extras, fragment, requestCode, intentFlags, null);
+    }
+
     public void openForResult(String url, Bundle extras, Fragment fragment, int requestCode, int intentFlags, Intent o) {
         if (fragment == null) {
             throw new ContextNotProvided("You need to supply a fragment for Router" + this.toString());
