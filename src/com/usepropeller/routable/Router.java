@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
@@ -409,6 +410,26 @@ public class Router {
         }
         intent.addFlags(intentFlags);
         ((Activity) context).startActivityForResult(intent, requestCode);
+    }
+
+    public void openForResult(String url, Bundle extras, Fragment fragment, int requestCode, int intentFlags, Intent o) {
+        if (fragment == null) {
+            throw new ContextNotProvided("You need to supply a fragment for Router" + this.toString());
+        }
+        RouterParams params = this.paramsForUrl(url);
+        RouterOptions options = params.routerOptions;
+        checkState(options.getCallback() == null, "openForResult cannot be used for callback routes");
+
+        Intent intent = this.intentFor(fragment.getActivity(), url, o);
+        if (intent == null) {
+            // Means the options weren't opening a new activity
+            return;
+        }
+        if (extras != null) {
+            intent.putExtras(extras);
+        }
+        intent.addFlags(intentFlags);
+        fragment.getActivity().startActivityFromFragment(fragment, intent, requestCode);
     }
 
     /**
